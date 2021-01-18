@@ -119,7 +119,7 @@ def make_events(cal, ufc_events):
     for i in range(len(ufc_events["names"])):
         main_card = datetime.fromisoformat(ufc_events["main_times"][i])
         desc = (
-            f"The main card starts at: {main_card.strftime('%H:%M %p (Pacific Time)')}"
+            f"The main card starts at: {main_card.strftime('%I:%M %p (Pacific Time)')}"
         )
         event = {
             "summary": ufc_events["names"][i],
