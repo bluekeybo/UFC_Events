@@ -1,4 +1,4 @@
-# UFC_Events
+# UFC Events in Google Calendar
 Use the Google Calendar API to create future UFC events' entries.
 
 Prerequisites:
