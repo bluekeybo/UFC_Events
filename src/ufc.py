@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-CAL_ID = "7bcq1p5fv4ch5niuvibcsuso5k@group.calendar.google.com"
+CAL_ID = "<your_calendar_id_here>"
 
 
 def calendar_service():
