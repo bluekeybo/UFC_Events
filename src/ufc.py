@@ -42,13 +42,8 @@ def ufc_get_events():
 
     soup = BeautifulSoup(ufc_web.text, "html.parser")
 
-    events_dict = {
-        "names": [],
-        "links": [],
-        "prelim_times": [],
-        "main_times": [],
-        "end_times": [],
-    }
+    # List of event dictionaries
+    events_dict = []
 
     events_all = soup.findAll("div", {"class": "c-card-event--result__info"})
     for event in events_all:
@@ -91,9 +86,15 @@ def ufc_get_events():
         name = link.split("/")[-1]
         name = "UFC Fight Night" if "fight" in name else name.upper()
 
-        new_vals = [name, link, prelim_time, main_time, end_time]
-        for key, new_val in zip(events_dict.keys(), new_vals):
-            events_dict[key].append(new_val)
+        events_dict.append(
+            {
+                "name": name,
+                "link": link,
+                "prelim_time": prelim_time,
+                "main_time": main_time,
+                "end_time": end_time,
+            }
+        )
 
     return events_dict
 
@@ -113,21 +114,21 @@ def make_events(cal, ufc_events):
     for ev in existing_events["items"]:
         existing_events_dict[ev["location"]] = ev["id"]
 
-    for i in range(len(ufc_events["names"])):
-        main_card = datetime.fromisoformat(ufc_events["main_times"][i])
+    for ufc in ufc_events:
+        main_card = datetime.fromisoformat(ufc["main_time"])
         desc = (
             f"The main card starts at: {main_card.strftime('%I:%M %p (Pacific Time)')}"
         )
         event = {
-            "summary": ufc_events["names"][i],
-            "location": ufc_events["links"][i],
+            "summary": ufc["name"],
+            "location": ufc["link"],
             "description": desc,
-            "start": {"dateTime": ufc_events["prelim_times"][i]},
-            "end": {"dateTime": ufc_events["end_times"][i]},
+            "start": {"dateTime": ufc["prelim_time"]},
+            "end": {"dateTime": ufc["end_time"]},
         }
 
         # Update events that exist or create event if it doesn't exist
-        if (id := existing_events_dict.get(ufc_events["links"][i])) :
+        if (id := existing_events_dict.get(ufc["link"])) :
             cal.events().update(calendarId=CAL_ID, eventId=id, body=event).execute()
         else:
             cal.events().insert(calendarId=CAL_ID, body=event).execute()
