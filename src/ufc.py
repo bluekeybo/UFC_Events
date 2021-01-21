@@ -100,7 +100,7 @@ def ufc_get_events():
 
 
 def make_events(cal, ufc_events):
-    # Get all future events and form a dictionary of --> link: event ID
+    # Get all future events and form a dictionary of form --> start_date_of_event: event ID
     existing_events = (
         cal.events()
         .list(
@@ -112,7 +112,8 @@ def make_events(cal, ufc_events):
     )
     existing_events_dict = {}
     for ev in existing_events["items"]:
-        existing_events_dict[ev["location"]] = ev["id"]
+        start_date = datetime.fromisoformat(ev["start"]["dateTime"]).date()
+        existing_events_dict[start_date] = ev["id"]
 
     for ufc in ufc_events:
         main_card = datetime.fromisoformat(ufc["main_time"])
@@ -128,7 +129,10 @@ def make_events(cal, ufc_events):
         }
 
         # Update events that exist or create event if it doesn't exist
-        if (id := existing_events_dict.get(ufc["link"])) :
+        # If new event is on the same date as existing event, update existing event
+        # Otherwise, create a new event
+        new_start_date = datetime.fromisoformat(ufc["prelim_time"]).date()
+        if (id := existing_events_dict.get(new_start_date)) :
             cal.events().update(calendarId=CAL_ID, eventId=id, body=event).execute()
         else:
             cal.events().insert(calendarId=CAL_ID, body=event).execute()
