@@ -6,6 +6,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from datetime import datetime, timedelta
+import socket
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
@@ -132,17 +133,25 @@ def make_events(cal, ufc_events):
         # If new event is on the same date as existing event, update existing event
         # Otherwise, create a new event
         new_start_date = datetime.fromisoformat(ufc["prelim_time"]).date()
-        if (id := existing_events_dict.get(new_start_date)) :
+        if id := existing_events_dict.get(new_start_date):
             cal.events().update(calendarId=CAL_ID, eventId=id, body=event).execute()
         else:
             cal.events().insert(calendarId=CAL_ID, body=event).execute()
 
 
 def main():
-    ufc_events = ufc_get_events()
-    cal = calendar_service()
-    make_events(cal, ufc_events)
+    for _ in range(10):
+        try:
+            ufc_events = ufc_get_events()
+            cal = calendar_service()
+            make_events(cal, ufc_events)
+        except (socket.timeout, requests.exceptions.ChunkedEncodingError):
+            print(f"URL error occured. Retrying...")
+        else:
+            break
 
 
 if __name__ == "__main__":
+    print("Updating UFC Calendar...")
     main()
+    print("UFC Calendar Updated!")
