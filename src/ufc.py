@@ -85,7 +85,10 @@ def ufc_get_events():
         link = ufc_link + event.find("a", href=True)["href"]
 
         name = link.split("/")[-1]
-        name = "UFC Fight Night" if "fight" in name else name.upper()
+        if ("fight" in name) or ("ufc" not in name):
+            name = "UFC Fight Night"
+        else:
+            name = name.upper()
 
         events_dict.append(
             {
