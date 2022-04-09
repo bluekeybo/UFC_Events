@@ -1,2 +1,3 @@
 src/*.json
 src/*.pickle
+.DS_Store
