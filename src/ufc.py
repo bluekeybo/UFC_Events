@@ -48,57 +48,60 @@ def ufc_get_events():
 
     events_all = soup.findAll("div", {"class": "c-card-event--result__info"})
     for event in events_all:
-        # Get timestamps
-        main_time = int(
-            event.find("div", {"class": "c-card-event--result__date tz-change-data"})[
-                "data-main-card-timestamp"
-            ]
-        )
-
-        # Skip past events
-        if main_time < current_time:
-            continue
-
-        main_time = datetime.fromtimestamp(main_time)
-
-        early_time = event.find(
-            "div", {"class": "c-card-event--result__date tz-change-data"}
-        )["data-early-card-timestamp"]
-
-        if early_time:
-            prelim_time = datetime.fromtimestamp(int(early_time))
-        else:
-            prelim_time = datetime.fromtimestamp(
-                int(
-                    event.find(
-                        "div", {"class": "c-card-event--result__date tz-change-data"}
-                    )["data-prelims-card-timestamp"]
-                )
+        try:
+            # Get timestamps
+            main_time = int(
+                event.find(
+                    "div", {"class": "c-card-event--result__date tz-change-data"}
+                )["data-main-card-timestamp"]
             )
 
-        end_time = main_time + timedelta(hours=3)
+            # Skip past events
+            if main_time < current_time:
+                continue
 
-        main_time = main_time.astimezone().isoformat()
-        prelim_time = prelim_time.astimezone().isoformat()
-        end_time = end_time.astimezone().isoformat()
+            main_time = datetime.fromtimestamp(main_time)
 
-        link = ufc_link + event.find("a", href=True)["href"]
+            early_time = event.find(
+                "div", {"class": "c-card-event--result__date tz-change-data"}
+            )["data-early-card-timestamp"]
+            if early_time:
+                prelim_time = datetime.fromtimestamp(int(early_time))
+            else:
+                prelim_time = datetime.fromtimestamp(
+                    int(
+                        event.find(
+                            "div",
+                            {"class": "c-card-event--result__date tz-change-data"},
+                        )["data-prelims-card-timestamp"]
+                    )
+                )
 
-        name = link.split("/")[-1]
-        if ("fight" in name) or ("ufc" not in name):
-            name = "UFC Fight Night"
-        else:
-            name = name.upper()
+            end_time = main_time + timedelta(hours=3)
 
-        events_dict.append(
-            {
-                "name": name,
-                "link": link,
-                "prelim_time": prelim_time,
-                "main_time": main_time,
-                "end_time": end_time,
-            }
-        )
+            main_time = main_time.astimezone().isoformat()
+            prelim_time = prelim_time.astimezone().isoformat()
+            end_time = end_time.astimezone().isoformat()
+
+            link = ufc_link + event.find("a", href=True)["href"]
+
+            name = link.split("/")[-1]
+            if ("fight" in name) or ("ufc" not in name):
+                name = "UFC Fight Night"
+            else:
+                name = name.upper()
+
+            events_dict.append(
+                {
+                    "name": name,
+                    "link": link,
+                    "prelim_time": prelim_time,
+                    "main_time": main_time,
+                    "end_time": end_time,
+                }
+            )
+        except:
+            continue
 
     return events_dict
 
