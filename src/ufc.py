@@ -65,17 +65,15 @@ def ufc_get_events():
             early_time = event.find(
                 "div", {"class": "c-card-event--result__date tz-change-data"}
             )["data-early-card-timestamp"]
+            prelim_time = event.find(
+                "div", {"class": "c-card-event--result__date tz-change-data"}
+            )["data-prelims-card-timestamp"]
+
+            prelim_time = datetime.fromtimestamp(int(prelim_time))
+
             if early_time:
-                prelim_time = datetime.fromtimestamp(int(early_time))
-            else:
-                prelim_time = datetime.fromtimestamp(
-                    int(
-                        event.find(
-                            "div",
-                            {"class": "c-card-event--result__date tz-change-data"},
-                        )["data-prelims-card-timestamp"]
-                    )
-                )
+                early_time = datetime.fromtimestamp(int(early_time))
+                prelim_time = early_time if (early_time < prelim_time) else prelim_time
 
             end_time = main_time + timedelta(hours=3)
 
